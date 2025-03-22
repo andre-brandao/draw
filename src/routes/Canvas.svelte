@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { appState } from '$lib/global.svelte';
+	import Tooltip from './Tooltip.svelte';
 	
 	// Canvas props using Svelte 5 syntax
 	const {
@@ -35,16 +36,29 @@
 	});
   </script>
   
-  <canvas
-	bind:this={canvas}
-	width={width}
-	height={height}
-	onmousedown={appState.handleMouseDown}
-	onmousemove={appState.handleMouseMove}
-	onmouseup={appState.handleMouseUp}
-  ></canvas>
+  <div class="canvas-container">
+	<canvas
+	  bind:this={canvas}
+	  width={appState.width}
+	  height={appState.height}
+	  onmousedown={appState.handleMouseDown}
+	  onmousemove={appState.handleMouseMove}
+	  onmouseup={appState.handleMouseUp}
+	></canvas>
+	
+	<Tooltip 
+	  x={appState.tooltip.x}
+	  y={appState.tooltip.y}
+	  text={appState.tooltip.text}
+	  visible={appState.tooltip.visible}
+	/>
+  </div>
   
   <style>
+	.canvas-container {
+	  position: relative;
+	}
+	
 	canvas {
 	  border: 1px solid #ccc;
 	  background-color: white;

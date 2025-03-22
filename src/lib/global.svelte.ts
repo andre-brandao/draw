@@ -47,6 +47,15 @@ function createState() {
 		tempLine: null as Line | null
 	});
 
+	// Tooltip state
+	let tooltip = $state({
+		visible: false,
+		x: 0,
+		y: 0,
+		text: '',
+		objects: 0
+	});
+
 	// ===== Helper Functions =====
 
 	// Get mouse position relative to canvas
@@ -196,6 +205,7 @@ function createState() {
 		geometry.polygons.forEach((polygon) => {
 			polygon.selected = select;
 		});
+		updateTooltipState();
 	}
 
 	// Move selected shapes
@@ -227,6 +237,11 @@ function createState() {
 				});
 			}
 		});
+		// Update tooltip position
+		if (tooltip.visible) {
+			tooltip.x += dx;
+			tooltip.y += dy;
+		}
 	}
 
 	// Delete selected shapes
@@ -462,6 +477,7 @@ function createState() {
 				break;
 			}
 		}
+		updateTooltipState();
 	}
 
 	// Handle mouse move event
@@ -544,6 +560,67 @@ function createState() {
 
 		interaction.isDrawing = false;
 		interaction.isDragging = false;
+		updateTooltipState();
+	}
+
+	// Update the tooltip state
+	function updateTooltipState(): void {
+		// Count selected objects
+		const selectedPoints = geometry.points.filter(p => p.selected).length;
+		const selectedLines = geometry.lines.filter(l => l.selected).length;
+		const selectedPolygons = geometry.polygons.filter(p => p.selected).length;
+		const total = selectedPoints + selectedLines + selectedPolygons;
+
+		if (total > 0) {
+			// Calculate position (center of selected objects)
+			let sumX = 0, sumY = 0, count = 0;
+			
+			geometry.points.forEach(point => {
+				if (point.selected) {
+					sumX += point.x;
+					sumY += point.y;
+					count++;
+				}
+			});
+			
+			geometry.lines.forEach(line => {
+				if (line.selected) {
+					sumX += (line.start.x + line.end.x) / 2;
+					sumY += (line.start.y + line.end.y) / 2;
+					count++;
+				}
+			});
+			
+			geometry.polygons.forEach(polygon => {
+				if (polygon.selected) {
+					const center = polygon.points.reduce(
+						(acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }),
+						{ x: 0, y: 0 }
+					);
+					sumX += center.x / polygon.points.length;
+					sumY += center.y / polygon.points.length;
+					count++;
+				}
+			});
+			
+			// Create tooltip text
+			let text = `${total} object${total > 1 ? 's' : ''} selected: `;
+			if (selectedPoints > 0) text += `${selectedPoints} point${selectedPoints > 1 ? 's' : ''} `;
+			if (selectedLines > 0) text += `${selectedLines} line${selectedLines > 1 ? 's' : ''} `;
+			if (selectedPolygons > 0) text += `${selectedPolygons} polygon${selectedPolygons > 1 ? 's' : ''} `;
+			
+			// Update tooltip state
+			tooltip = {
+				visible: true,
+				x: sumX / count,
+				y: sumY / count - 30, // Position above the objects
+				text,
+				objects: total
+			};
+		} else {
+			// Hide tooltip if nothing is selected
+			tooltip.visible = false;
+		}
 	}
 
 	// Reset state
@@ -573,6 +650,224 @@ function createState() {
 		if (ctx && canvas) {
 			ctx.clearRect(0, 0, width, height);
 		}
+	}
+
+	// Add this function to createState
+	function transformSelectedShapes(transformation: Transformation): void {
+		switch (transformation.type) {
+			case 'translate':
+				// Reuse existing movement function
+				moveSelectedShapes(transformation.dx, transformation.dy);
+				break;
+				
+			case 'rotate':
+				rotateSelectedShapes(
+					transformation.angle, 
+					{ x: transformation.originX, y: transformation.originY }
+				);
+				break;
+				
+			case 'scale':
+				scaleSelectedShapes(
+					transformation.scaleX,
+					transformation.scaleY,
+					{ x: transformation.originX, y: transformation.originY }
+				);
+				break;
+				
+			case 'reflect':
+				reflectSelectedShapes(
+					transformation.axis,
+					{ x: transformation.originX, y: transformation.originY }
+				);
+				break;
+		}
+		
+		redraw();
+	}
+
+	// Rotate point around origin
+	function rotatePoint(
+		point: { x: number, y: number }, 
+		origin: { x: number, y: number }, 
+		angleDeg: number
+	): { x: number, y: number } {
+		// Convert to radians
+		const angleRad = (angleDeg * Math.PI) / 180;
+		
+		// Translate point to origin
+		const x = point.x - origin.x;
+		const y = point.y - origin.y;
+		
+		// Rotate
+		const cos = Math.cos(angleRad);
+		const sin = Math.sin(angleRad);
+		const xNew = x * cos - y * sin;
+		const yNew = x * sin + y * cos;
+		
+		// Translate back
+		return {
+			x: xNew + origin.x,
+			y: yNew + origin.y
+		};
+	}
+
+	// Rotate selected shapes
+	function rotateSelectedShapes(angleDeg: number, origin: { x: number, y: number }): void {
+		// Rotate selected points
+		geometry.points.forEach(point => {
+			if (point.selected) {
+				const rotated = rotatePoint(point, origin, angleDeg);
+				point.x = rotated.x;
+				point.y = rotated.y;
+			}
+		});
+		
+		// Rotate selected lines
+		geometry.lines.forEach(line => {
+			if (line.selected) {
+				const rotatedStart = rotatePoint(line.start, origin, angleDeg);
+				const rotatedEnd = rotatePoint(line.end, origin, angleDeg);
+				
+				line.start.x = rotatedStart.x;
+				line.start.y = rotatedStart.y;
+				line.end.x = rotatedEnd.x;
+				line.end.y = rotatedEnd.y;
+			}
+		});
+		
+		// Rotate selected polygons
+		geometry.polygons.forEach(polygon => {
+			if (polygon.selected) {
+				polygon.points = polygon.points.map(point => {
+					const rotated = rotatePoint(point, origin, angleDeg);
+					return { ...point, x: rotated.x, y: rotated.y };
+				});
+			}
+		});
+	}
+
+	// Scale point from origin
+	function scalePoint(
+		point: { x: number, y: number }, 
+		origin: { x: number, y: number },
+		scaleX: number,
+		scaleY: number
+	): { x: number, y: number } {
+		return {
+			x: origin.x + (point.x - origin.x) * scaleX,
+			y: origin.y + (point.y - origin.y) * scaleY
+		};
+	}
+
+	// Scale selected shapes
+	function scaleSelectedShapes(
+		scaleX: number, 
+		scaleY: number, 
+		origin: { x: number, y: number }
+	): void {
+		// Scale selected points
+		geometry.points.forEach(point => {
+			if (point.selected) {
+				const scaled = scalePoint(point, origin, scaleX, scaleY);
+				point.x = scaled.x;
+				point.y = scaled.y;
+			}
+		});
+		
+		// Scale selected lines
+		geometry.lines.forEach(line => {
+			if (line.selected) {
+				const scaledStart = scalePoint(line.start, origin, scaleX, scaleY);
+				const scaledEnd = scalePoint(line.end, origin, scaleX, scaleY);
+				
+				line.start.x = scaledStart.x;
+				line.start.y = scaledStart.y;
+				line.end.x = scaledEnd.x;
+				line.end.y = scaledEnd.y;
+			}
+		});
+		
+		// Scale selected polygons
+		geometry.polygons.forEach(polygon => {
+			if (polygon.selected) {
+				polygon.points = polygon.points.map(point => {
+					const scaled = scalePoint(point, origin, scaleX, scaleY);
+					return { ...point, x: scaled.x, y: scaled.y };
+				});
+			}
+		});
+	}
+
+	// Reflect point across axis through origin
+	function reflectPoint(
+		point: { x: number, y: number },
+		origin: { x: number, y: number },
+		axis: 'x' | 'y' | 'xy'
+	): { x: number, y: number } {
+		// Translate to origin
+		const x = point.x - origin.x;
+		const y = point.y - origin.y;
+		
+		let xNew = x;
+		let yNew = y;
+		
+		switch (axis) {
+			case 'x':
+				// Reflect across x-axis
+				yNew = -y;
+				break;
+			case 'y':
+				// Reflect across y-axis
+				xNew = -x;
+				break;
+			case 'xy':
+				// Reflect across line y = x
+				xNew = y;
+				yNew = x;
+				break;
+		}
+		
+		// Translate back
+		return {
+			x: xNew + origin.x,
+			y: yNew + origin.y
+		};
+	}
+
+	// Reflect selected shapes
+	function reflectSelectedShapes(axis: 'x' | 'y' | 'xy', origin: { x: number, y: number }): void {
+		// Reflect selected points
+		geometry.points.forEach(point => {
+			if (point.selected) {
+				const reflected = reflectPoint(point, origin, axis);
+				point.x = reflected.x;
+				point.y = reflected.y;
+			}
+		});
+		
+		// Reflect selected lines
+		geometry.lines.forEach(line => {
+			if (line.selected) {
+				const reflectedStart = reflectPoint(line.start, origin, axis);
+				const reflectedEnd = reflectPoint(line.end, origin, axis);
+				
+				line.start.x = reflectedStart.x;
+				line.start.y = reflectedStart.y;
+				line.end.x = reflectedEnd.x;
+				line.end.y = reflectedEnd.y;
+			}
+		});
+		
+		// Reflect selected polygons
+		geometry.polygons.forEach(polygon => {
+			if (polygon.selected) {
+				polygon.points = polygon.points.map(point => {
+					const reflected = reflectPoint(point, origin, axis);
+					return { ...point, x: reflected.x, y: reflected.y };
+				});
+			}
+		});
 	}
 
 	return {
@@ -628,6 +923,11 @@ function createState() {
 			return temp;
 		},
 
+		// Add tooltip state
+		get tooltip() {
+			return tooltip;
+		},
+
 		// Actions
 		selectAll: () => toggleSelectAll(true),
 		deselectAll: () => toggleSelectAll(false),
@@ -636,6 +936,9 @@ function createState() {
 			colorSelectedShapes(color);
 			redraw();
 		},
+
+		// Add transformation function
+		transformSelectedShapes,
 
 		// Event handlers
 		handleMouseDown,
@@ -647,5 +950,12 @@ function createState() {
 		resetState
 	};
 }
+
+// Add this type for transformation operations
+type Transformation = 
+  | { type: 'translate', dx: number, dy: number }
+  | { type: 'rotate', angle: number, originX: number, originY: number }
+  | { type: 'scale', scaleX: number, scaleY: number, originX: number, originY: number }
+  | { type: 'reflect', axis: 'x' | 'y' | 'xy', originX: number, originY: number };
 
 export const appState = createState();
