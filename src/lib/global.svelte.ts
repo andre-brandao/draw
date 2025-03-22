@@ -249,6 +249,7 @@ function createState() {
 		geometry.points = geometry.points.filter((point) => !point.selected);
 		geometry.lines = geometry.lines.filter((line) => !line.selected);
 		geometry.polygons = geometry.polygons.filter((polygon) => !polygon.selected);
+		redraw()
 	}
 
 	// Color selected shapes
@@ -947,7 +948,8 @@ function createState() {
 
 		// Canvas drawing
 		redraw,
-		resetState
+		resetState,
+		deleteSelectedShapes
 	};
 }
 
