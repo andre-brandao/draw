@@ -5,144 +5,144 @@ import { Point } from './Point.svelte';
 import { bresenhamCircle } from '../rasterization';
 
 export class Circle implements Shape {
-  type = 'circle' as const;
-  center = $state<Point>(new Point({ x: 0, y: 0 }));
-  radius = $state(0);
-  color = $state('#000000');
-  selected = $state(false);
+	type = 'circle' as const;
+	center = $state<Point>(new Point({ x: 0, y: 0 }));
+	radius = $state(0);
+	color = $state('#000000');
+	selected = $state(false);
 
-  constructor(data: CircleData) {
-    this.center = new Point({ 
-      x: data.center.x, 
-      y: data.center.y,
-      color: data.color || '#000000'
-    });
-    
-    this.radius = data.radius;
-    this.color = data.color || '#000000';
-    this.selected = data.selected || false;
-  }
+	constructor(data: CircleData) {
+		this.center = new Point({
+			x: data.center.x,
+			y: data.center.y,
+			color: data.color || '#000000'
+		});
 
-  // Shape methods
-  clone(): Shape {
-    return new Circle({
-      center: { 
-        x: this.center.x, 
-        y: this.center.y
-      },
-      radius: this.radius,
-      color: this.color,
-      selected: this.selected
-    });
-  }
+		this.radius = data.radius;
+		this.color = data.color || '#000000';
+		this.selected = data.selected || false;
+	}
 
-  serialize(): CircleData {
-    return {
-      center: { 
-        x: this.center.x, 
-        y: this.center.y 
-      },
-      radius: this.radius,
-      color: this.color,
-      selected: this.selected
-    };
-  }
+	// Shape methods
+	clone(): Shape {
+		return new Circle({
+			center: {
+				x: this.center.x,
+				y: this.center.y
+			},
+			radius: this.radius,
+			color: this.color,
+			selected: this.selected
+		});
+	}
 
-  contains(x: number, y: number, threshold = 5): boolean {
-    // Calculate distance from point to center
-    const dx = x - this.center.x;
-    const dy = y - this.center.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    
-    // Check if point is within threshold of the circle's boundary
-    return Math.abs(distance - this.radius) <= threshold;
-  }
+	serialize(): CircleData {
+		return {
+			center: {
+				x: this.center.x,
+				y: this.center.y
+			},
+			radius: this.radius,
+			color: this.color,
+			selected: this.selected
+		};
+	}
 
-  getBoundingBox() {
-    return {
-      x1: this.center.x - this.radius,
-      y1: this.center.y - this.radius,
-      x2: this.center.x + this.radius,
-      y2: this.center.y + this.radius
-    };
-  }
+	contains(x: number, y: number, threshold = 5): boolean {
+		// Calculate distance from point to center
+		const dx = x - this.center.x;
+		const dy = y - this.center.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
 
-  // Selectable methods
-  toggleSelect(): void {
-    this.selected = !this.selected;
-  }
+		// Check if point is within threshold of the circle's boundary
+		return Math.abs(distance - this.radius) <= threshold;
+	}
 
-  select(): void {
-    this.selected = true;
-  }
+	getBoundingBox() {
+		return {
+			x1: this.center.x - this.radius,
+			y1: this.center.y - this.radius,
+			x2: this.center.x + this.radius,
+			y2: this.center.y + this.radius
+		};
+	}
 
-  deselect(): void {
-    this.selected = false;
-  }
+	// Selectable methods
+	toggleSelect(): void {
+		this.selected = !this.selected;
+	}
 
-  // Colorable methods
-  setColor(color: string): void {
-    this.color = color;
-    this.center.setColor(color);
-  }
+	select(): void {
+		this.selected = true;
+	}
 
-  // Transformable methods
-  translate(dx: number, dy: number): void {
-    this.center.translate(dx, dy);
-  }
+	deselect(): void {
+		this.selected = false;
+	}
 
-  rotate(angle: number, origin: {x: number, y: number}): void {
-    // Only the center point needs to rotate, radius stays the same
-    this.center.rotate(angle, origin);
-  }
+	// Colorable methods
+	setColor(color: string): void {
+		this.color = color;
+		this.center.setColor(color);
+	}
 
-  scale(scaleX: number, scaleY: number, origin: {x: number, y: number}): void {
-    // Move the center point
-    this.center.scale(scaleX, scaleY, origin);
-    
-    // Scale the radius (use average of scaleX and scaleY)
-    const avgScale = (Math.abs(scaleX) + Math.abs(scaleY)) / 2;
-    this.radius *= avgScale;
-  }
+	// Transformable methods
+	translate(dx: number, dy: number): void {
+		this.center.translate(dx, dy);
+	}
 
-  reflect(axis: 'x' | 'y' | 'xy', origin: {x: number, y: number}): void {
-    // Only need to reflect the center point
-    this.center.reflect(axis, origin);
-  }
+	rotate(angle: number, origin: { x: number; y: number }): void {
+		// Only the center point needs to rotate, radius stays the same
+		this.center.rotate(angle, origin);
+	}
 
-  // Drawable method
-  draw(ctx: CanvasRenderingContext2D): void {
-    // Use Bresenham's circle algorithm
-    const plot = (x: number, y: number) => {
-      ctx.fillStyle = this.color;
-      ctx.fillRect(x, y, 1, 1);
-    };
-    
-    bresenhamCircle(
-      Math.round(this.center.x), 
-      Math.round(this.center.y), 
-      Math.round(this.radius), 
-      plot
-    );
-    
-    // Optional: Fill the circle with a semi-transparent color
-    if (this.radius > 0) {
-      ctx.beginPath();
-      ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.color + '40'; // 25% opacity
-      ctx.fill();
-    }
+	scale(scaleX: number, scaleY: number, origin: { x: number; y: number }): void {
+		// Move the center point
+		this.center.scale(scaleX, scaleY, origin);
 
-    // Draw center point and selection indicator
-    if (this.selected) {
-      ctx.strokeStyle = SELECTION_BORDER_COLOR;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
-      ctx.stroke();
-      
-      // Draw center point when selected
-      this.center.draw(ctx);
-    }
-  }
+		// Scale the radius (use average of scaleX and scaleY)
+		const avgScale = (Math.abs(scaleX) + Math.abs(scaleY)) / 2;
+		this.radius *= avgScale;
+	}
+
+	reflect(axis: 'x' | 'y' | 'xy', origin: { x: number; y: number }): void {
+		// Only need to reflect the center point
+		this.center.reflect(axis, origin);
+	}
+
+	// Drawable method
+	draw(ctx: CanvasRenderingContext2D): void {
+		// Use Bresenham's circle algorithm
+		const plot = (x: number, y: number) => {
+			ctx.fillStyle = this.color;
+			ctx.fillRect(x, y, 1, 1);
+		};
+
+		bresenhamCircle(
+			Math.round(this.center.x),
+			Math.round(this.center.y),
+			Math.round(this.radius),
+			plot
+		);
+
+		// Optional: Fill the circle with a semi-transparent color
+		if (this.radius > 0) {
+			ctx.beginPath();
+			ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+			ctx.fillStyle = this.color + '40'; // 25% opacity
+			ctx.fill();
+		}
+
+		// Draw center point and selection indicator
+		if (this.selected) {
+			ctx.strokeStyle = SELECTION_BORDER_COLOR;
+			ctx.lineWidth = 3;
+			ctx.beginPath();
+			ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+			ctx.stroke();
+
+			// Draw center point when selected
+			this.center.draw(ctx);
+		}
+	}
 }

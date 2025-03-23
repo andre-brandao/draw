@@ -35,7 +35,6 @@
 		{ id: 'move', name: 'Move', icon: '↔' },
 		{ id: 'delete', name: 'Delete', icon: '🗑' }
 	];
-
 </script>
 
 <div class="tools-menu">
@@ -164,8 +163,6 @@
 		padding-bottom: 5px;
 	}
 
-
-
 	.tool-buttons {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -221,7 +218,6 @@
 	.selection-actions button:hover {
 		background-color: #f5f5f5;
 	}
-
 
 	.rasterization-options {
 		display: flex;

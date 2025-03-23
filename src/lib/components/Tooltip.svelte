@@ -67,7 +67,7 @@
 
 	function deleteSelected() {
 		appState.deleteSelectedShapes();
-        visible = false;
+		visible = false;
 	}
 </script>
 

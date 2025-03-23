@@ -2,7 +2,14 @@ import { Point } from './shapes/Point.svelte';
 import { Line } from './shapes/Line.svelte';
 import { Polygon } from './shapes/Polygon.svelte';
 import { Circle } from './shapes/Circle.svelte';
-import type { Shape, PointData, LineData, PolygonData, CircleData, TransformationType } from '../types';
+import type {
+	Shape,
+	PointData,
+	LineData,
+	PolygonData,
+	CircleData,
+	TransformationType
+} from '../types';
 import { POINT_RADIUS } from './index';
 
 export class GeometryStore {
@@ -147,7 +154,7 @@ export class GeometryStore {
 
 	// Serialize all shapes to JSON
 	serializeShapes(): string {
-		const shapesData = this.shapes.map(shape => {
+		const shapesData = this.shapes.map((shape) => {
 			switch (shape.type) {
 				case 'point':
 					return { type: 'point', data: (shape as Point).serialize() };
@@ -167,7 +174,7 @@ export class GeometryStore {
 		try {
 			const shapesData = JSON.parse(json);
 			this.clear(); // Clear current shapes first
-			
+
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			shapesData.forEach((item: any) => {
 				switch (item.type) {

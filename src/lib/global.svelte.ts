@@ -19,7 +19,7 @@ function createState() {
 	let selectedTool: Tool = $state('cursor');
 	let currentColor = $state('#000000');
 	let snappingEnabled = $state(false);
-  
+
 	// Interaction state
 	let interaction = $state({
 		isDrawing: false,
@@ -86,16 +86,18 @@ function createState() {
 
 					// Check for snap to the line segment itself
 					const closestPoint = getClosestPointOnLineSegment(
-						line.start.x, line.start.y,
-						line.end.x, line.end.y,
-						x, y
+						line.start.x,
+						line.start.y,
+						line.end.x,
+						line.end.y,
+						x,
+						y
 					);
-					
+
 					const distance = Math.sqrt(
-						Math.pow(closestPoint.x - x, 2) + 
-						Math.pow(closestPoint.y - y, 2)
+						Math.pow(closestPoint.x - x, 2) + Math.pow(closestPoint.y - y, 2)
 					);
-					
+
 					if (distance <= SNAP_THRESHOLD) {
 						return closestPoint;
 					}
@@ -103,7 +105,7 @@ function createState() {
 				}
 				case 'polygon': {
 					const polygon = shape as Polygon;
-					
+
 					// Check vertices first
 					for (const pt of polygon.points) {
 						if (Math.abs(pt.x - x) <= SNAP_THRESHOLD && Math.abs(pt.y - y) <= SNAP_THRESHOLD) {
@@ -111,24 +113,19 @@ function createState() {
 						}
 						break;
 					}
-					
+
 					// Check edges
 					if (polygon.points.length >= 2) {
 						for (let i = 0; i < polygon.points.length; i++) {
 							const p1 = polygon.points[i];
 							const p2 = polygon.points[(i + 1) % polygon.points.length];
-							
-							const closestPoint = getClosestPointOnLineSegment(
-								p1.x, p1.y, 
-								p2.x, p2.y, 
-								x, y
-							);
-							
+
+							const closestPoint = getClosestPointOnLineSegment(p1.x, p1.y, p2.x, p2.y, x, y);
+
 							const distance = Math.sqrt(
-								Math.pow(closestPoint.x - x, 2) + 
-								Math.pow(closestPoint.y - y, 2)
+								Math.pow(closestPoint.x - x, 2) + Math.pow(closestPoint.y - y, 2)
 							);
-							
+
 							if (distance <= SNAP_THRESHOLD) {
 								return closestPoint;
 							}
@@ -138,7 +135,7 @@ function createState() {
 				}
 				case 'circle': {
 					const circle = shape as Circle;
-					
+
 					// Check center first
 					if (
 						Math.abs(circle.center.x - x) <= SNAP_THRESHOLD &&
@@ -147,12 +144,12 @@ function createState() {
 						return { x: circle.center.x, y: circle.center.y };
 						break;
 					}
-					
+
 					// Check if point is near the perimeter
 					const dx = x - circle.center.x;
 					const dy = y - circle.center.y;
 					const distanceToCenter = Math.sqrt(dx * dx + dy * dy);
-					
+
 					if (Math.abs(distanceToCenter - circle.radius) <= SNAP_THRESHOLD) {
 						// Project the point onto the circle perimeter
 						const angle = Math.atan2(dy, dx);
@@ -196,36 +193,39 @@ function createState() {
 
 	// Helper function to get closest point on a line segment
 	function getClosestPointOnLineSegment(
-		x1: number, y1: number,  // Start of segment
-		x2: number, y2: number,  // End of segment
-		x: number, y: number     // Point to check
+		x1: number,
+		y1: number, // Start of segment
+		x2: number,
+		y2: number, // End of segment
+		x: number,
+		y: number // Point to check
 	): { x: number; y: number } {
 		const A = x - x1;
 		const B = y - y1;
 		const C = x2 - x1;
 		const D = y2 - y1;
-	  
+
 		const dot = A * C + B * D;
 		const lenSq = C * C + D * D;
 		let param = -1;
-	  
+
 		if (lenSq !== 0) param = dot / lenSq;
-	  
+
 		let xx, yy;
-	  
+
 		if (param < 0) {
-		  xx = x1;
-		  yy = y1;
+			xx = x1;
+			yy = y1;
 		} else if (param > 1) {
-		  xx = x2;
-		  yy = y2;
+			xx = x2;
+			yy = y2;
 		} else {
-		  xx = x1 + param * C;
-		  yy = y1 + param * D;
+			xx = x1 + param * C;
+			yy = y1 + param * D;
 		}
-	  
+
 		return { x: xx, y: yy };
-	  }
+	}
 
 	// ===== Helper Functions =====
 
@@ -291,18 +291,18 @@ function createState() {
 	// Handle mouse down event
 	function handleMouseDown(e: MouseEvent): void {
 		const { x, y } = getMousePos(e);
-		
+
 		// Check for snap points when starting a shape
 		const snapPoint = findSnapPoint(x, y);
 		const snapX = snapPoint ? snapPoint.x : x;
 		const snapY = snapPoint ? snapPoint.y : y;
-		
+
 		interaction.startX = snapX;
 		interaction.startY = snapY;
 		interaction.currentX = snapX;
 		interaction.currentY = snapY;
 		interaction.isDrawing = true;
-	
+
 		switch (selectedTool) {
 			case 'point': {
 				const newPoint = geometryStore.addPoint({
@@ -313,14 +313,14 @@ function createState() {
 				redraw();
 				break;
 			}
-	
+
 			case 'line': {
-				const startPoint = new Point({ 
+				const startPoint = new Point({
 					x: snapX,
 					y: snapY,
 					color: currentColor
 				});
-				const endPoint = new Point({ 
+				const endPoint = new Point({
 					x: snapX,
 					y: snapY,
 					color: currentColor
@@ -332,7 +332,7 @@ function createState() {
 				});
 				break;
 			}
-	
+
 			case 'polygon': {
 				if (!temp.currentPolygon) {
 					// Start a new polygon
@@ -363,7 +363,7 @@ function createState() {
 				redraw();
 				break;
 			}
-	
+
 			case 'circle': {
 				// Start drawing a circle - set the center
 				temp.tempCircle = new Circle({
@@ -373,34 +373,34 @@ function createState() {
 				});
 				break;
 			}
-	
+
 			case 'select_cursor': {
 				// Find and select a shape at this position
 				const shape = geometryStore.findShapeAt(snapX, snapY);
-	
+
 				// Deselect all first if not holding shift
 				if (!e.shiftKey) {
 					geometryStore.deselectAll();
 				}
-	
+
 				// Select the found shape if any
 				if (shape) {
 					geometryStore.selectShape(shape);
 				}
-	
+
 				redraw();
 				break;
 			}
-	
+
 			case 'select_box':
 				// Start drawing selection box
 				break;
-	
+
 			case 'move': {
 				interaction.isDragging = true;
 				interaction.lastX = snapX;
 				interaction.lastY = snapY;
-	
+
 				// If nothing is selected, try to select something under the cursor
 				if (geometryStore.selectedShapes.length === 0) {
 					const shapeUnderCursor = geometryStore.findShapeAt(snapX, snapY);
@@ -411,11 +411,11 @@ function createState() {
 				}
 				break;
 			}
-	
+
 			case 'delete': {
 				// Find a shape at click position and mark it for deletion
 				const shapeToDelete = geometryStore.findShapeAt(snapX, snapY);
-	
+
 				if (shapeToDelete) {
 					geometryStore.selectShape(shapeToDelete);
 					geometryStore.deleteSelectedShapes();
@@ -423,18 +423,18 @@ function createState() {
 				}
 				break;
 			}
-	
+
 			case 'cursor':
 			default: {
 				// Just a regular cursor click
 				const clickedShape = geometryStore.findShapeAt(snapX, snapY);
-	
+
 				if (clickedShape) {
 					// Start dragging if we clicked on a shape
 					interaction.isDragging = true;
 					interaction.lastX = snapX;
 					interaction.lastY = snapY;
-	
+
 					// If the shape is not already selected, select only this shape
 					if (!clickedShape.selected) {
 						geometryStore.deselectAll();
@@ -464,7 +464,7 @@ function createState() {
 				if (temp.tempLine) {
 					// Check for snap points when clipping is enabled
 					const snapPoint = findSnapPoint(x, y);
-					
+
 					if (snapPoint) {
 						temp.tempLine.end.x = snapPoint.x;
 						temp.tempLine.end.y = snapPoint.y;
@@ -518,7 +518,7 @@ function createState() {
 	// Handle mouse up event
 	function handleMouseUp(e: MouseEvent): void {
 		const { x, y } = getMousePos(e);
-		
+
 		// Check for snap points
 		const snapPoint = findSnapPoint(x, y);
 		const snapX = snapPoint ? snapPoint.x : x;
@@ -792,12 +792,12 @@ function createState() {
 		get tooltip() {
 			return tooltip;
 		},
-    get snappingEnabled() {
-      return snappingEnabled;
-    },
-    set snappingEnabled(value) {
-      snappingEnabled = value;
-    },
+		get snappingEnabled() {
+			return snappingEnabled;
+		},
+		set snappingEnabled(value) {
+			snappingEnabled = value;
+		},
 
 		// Actions
 		selectAll: () => {
@@ -837,7 +837,12 @@ function createState() {
 		saveDrawing,
 		loadDrawing,
 		getSavedDrawings,
-		deleteSavedDrawing
+		deleteSavedDrawing,
+
+		getAreaDesenho: () => {
+			// return pixel matriz
+			const imgData = ctx?.getImageData(0, 0, width, height);
+		}
 	};
 }
 
