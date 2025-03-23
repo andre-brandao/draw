@@ -47,6 +47,15 @@
 
 <div class="tools-menu">
 	<div class="toolbar-section">
+		<h3>Settings</h3>
+		<div class="setting-option">
+			<label for="clipping-toggle">
+				<input type="checkbox" id="clipping-toggle" bind:checked={appState.clippingEnabled} />
+				Enable Snapping
+			</label>
+		</div>
+	</div>
+	<div class="toolbar-section">
 		<h3>Drawing Tools</h3>
 		<div class="tool-buttons">
 			{#each drawingTools as tool}
@@ -271,4 +280,25 @@
 		cursor: pointer;
 	}
 
+	.setting-option {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 10px;
+		padding: 8px;
+		background-color: #f5f5f5;
+		border-radius: 4px;
+	}
+
+	.setting-option label {
+		display: flex;
+		align-items: center;
+		font-weight: bold;
+	}
+
+	.setting-help {
+		font-size: 0.8em;
+		color: #666;
+		margin-top: 4px;
+		margin-left: 20px;
+	}
 </style>
