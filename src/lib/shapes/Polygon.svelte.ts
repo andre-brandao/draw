@@ -1,6 +1,8 @@
 import type { Shape, PolygonData, PointData } from '../../types';
 import { SELECTION_BORDER_COLOR } from '../index';
 import { Point } from './Point.svelte';
+import { appState } from '../global.svelte';
+import {ddaLine, bresenhamLine} from '../rasterization'
 
 export class Polygon implements Shape {
   type = 'polygon' as const;
@@ -115,26 +117,69 @@ export class Polygon implements Shape {
   draw(ctx: CanvasRenderingContext2D): void {
     if (this.points.length < 2) return;
     
-    ctx.beginPath();
-    ctx.moveTo(this.points[0].x, this.points[0].y);
-    
-    for (let i = 1; i < this.points.length; i++) {
-      ctx.lineTo(this.points[i].x, this.points[i].y);
-    }
-    
+    // Draw filled polygon using built-in methods (filling with rasterization is complex)
     if (this.points.length >= 3) {
+      ctx.beginPath();
+      ctx.moveTo(this.points[0].x, this.points[0].y);
+      
+      for (let i = 1; i < this.points.length; i++) {
+        ctx.lineTo(this.points[i].x, this.points[i].y);
+      }
+      
       ctx.closePath();
       ctx.fillStyle = this.color + '80'; // 50% opacity
       ctx.fill();
     }
     
-    ctx.strokeStyle = this.color;
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // Draw edges using rasterization
+    for (let i = 0; i < this.points.length; i++) {
+      const start = this.points[i];
+      const end = this.points[(i + 1) % this.points.length];
+      
+      if (appState.rasterizationAlgorithm === 'dda') {
+        const plotDDA = (x: number, y: number) => {
+          ctx.fillStyle = this.color;
+          ctx.fillRect(x, y, 1, 1);
+        };
+        
+        ddaLine(
+          Math.round(start.x),
+          Math.round(start.y),
+          Math.round(end.x),
+          Math.round(end.y),
+          plotDDA
+        );
+      } else {
+        const plotBresenham = (x: number, y: number) => {
+          ctx.fillStyle = this.color;
+          ctx.fillRect(x, y, 1, 1);
+        };
+        
+        bresenhamLine(
+          Math.round(start.x),
+          Math.round(start.y),
+          Math.round(end.x),
+          Math.round(end.y),
+          plotBresenham
+        );
+      }
+    }
     
+    // Draw selection indicator if selected
     if (this.selected) {
       ctx.strokeStyle = SELECTION_BORDER_COLOR;
       ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(this.points[0].x, this.points[0].y);
+      
+      for (let i = 1; i < this.points.length; i++) {
+        ctx.lineTo(this.points[i].x, this.points[i].y);
+      }
+      
+      if (this.points.length >= 3) {
+        ctx.closePath();
+      }
+      
       ctx.stroke();
     }
     
