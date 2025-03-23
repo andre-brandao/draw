@@ -7,6 +7,17 @@ import { Line } from './shapes/Line.svelte';
 import { Polygon } from './shapes/Polygon.svelte';
 import { Circle } from './shapes/Circle.svelte';
 import { POINT_RADIUS, drawSelectionRect } from './index';
+import { clipAndDrawCircle, clipAndDrawPolygon, cohenSutherland, liangBarsky } from './clipping';
+
+// Update the ClippingConfig type to be exported
+export type ClippingConfig = {
+    enabled: boolean;
+    algorithm: 'cohen-sutherland' | 'liang-barsky';
+    xMin: number;
+    yMin: number;
+    xMax: number;
+    yMax: number;
+};
 
 function createState() {
 	// Canvas state
@@ -14,6 +25,7 @@ function createState() {
 	let ctx: CanvasRenderingContext2D | undefined = $state(undefined);
 	let width = $state(800);
 	let height = $state(600);
+	
 
 	// Tools state
 	let selectedTool: Tool = $state('cursor');
@@ -50,6 +62,16 @@ function createState() {
 
 	// Add this to your existing state variables
 	let rasterizationAlgorithm: 'dda' | 'bresenham' = $state('dda'); // 'dda', 'bresenham'
+
+	// Add this to your state variables
+	let clippingConfig: ClippingConfig = {
+		enabled: false,
+		algorithm: 'cohen-sutherland',
+		xMin: 0,
+		yMin: 0,
+		xMax: width,
+		yMax: height
+	};
 
 	// Snap threshold in pixels
 	const SNAP_THRESHOLD = 10;
@@ -203,7 +225,7 @@ function createState() {
 		const A = x - x1;
 		const B = y - y1;
 		const C = x2 - x1;
-		const D = y2 - y1;
+		const D = y2 - y2;
 
 		const dot = A * C + B * D;
 		const lenSq = C * C + D * D;
@@ -248,8 +270,67 @@ function createState() {
 		// Clear the canvas
 		ctx.clearRect(0, 0, width, height);
 
-		// Draw all shapes
-		geometryStore.draw(ctx);
+		 // Apply clipping if enabled
+		if (clippingConfig.enabled) {
+			// Draw the clipping rectangle as a visual guide
+			ctx.strokeStyle = 'rgba(0, 100, 200, 0.5)';
+			ctx.lineWidth = 1;
+			ctx.strokeRect(
+				clippingConfig.xMin,
+				clippingConfig.yMin,
+				clippingConfig.xMax - clippingConfig.xMin,
+				clippingConfig.yMax - clippingConfig.yMin
+			);
+		}
+
+		// Draw all shapes with clipping if enabled
+		geometryStore.shapes.forEach((shape) => {
+			if (clippingConfig.enabled) {
+				if (shape instanceof Line) {
+					const line = shape as Line;
+					let clippedLine;
+					
+					if (clippingConfig.algorithm === 'cohen-sutherland') {
+						clippedLine = cohenSutherland(
+							line.start.x, line.start.y,
+							line.end.x, line.end.y,
+							clippingConfig.xMin, clippingConfig.yMin,
+							clippingConfig.xMax, clippingConfig.yMax
+						);
+					} else {
+						clippedLine = liangBarsky(
+							line.start.x, line.start.y,
+							line.end.x, line.end.y,
+							clippingConfig.xMin, clippingConfig.yMin,
+							clippingConfig.xMax, clippingConfig.yMax
+						);
+					}
+					
+					if (clippedLine.accepted) {
+						// Draw the clipped line
+						const tempLine = new Line({
+							start: { x: clippedLine.x0, y: clippedLine.y0 },
+							end: { x: clippedLine.x1, y: clippedLine.y1 },
+							color: line.color
+						});
+						if (shape.selected) {
+							tempLine.select();
+						}
+						tempLine.draw(ctx!);
+					}
+				} else if (shape instanceof Circle) {
+					clipAndDrawCircle(shape, ctx!, clippingConfig);
+				} else if (shape instanceof Polygon) {
+					clipAndDrawPolygon(shape, ctx!, clippingConfig);
+				} else {
+					// Other shapes draw normally
+					shape.draw(ctx!);
+				}
+			} else {
+				// If clipping is disabled, draw normally
+				shape.draw(ctx!);
+			}
+		});
 
 		// Draw any temporary shapes
 		if (temp.tempLine) {
@@ -779,6 +860,17 @@ function createState() {
 		},
 		set rasterizationAlgorithm(value) {
 			rasterizationAlgorithm = value;
+			redraw();
+		},
+
+		 // Add this to your returned appState object
+		get clippingConfig() {
+			return clippingConfig;
+		},
+
+		// Add a method to set the clipping configuration
+		setClippingConfig(config: Partial<ClippingConfig>) {
+			clippingConfig = { ...clippingConfig, ...config };
 			redraw();
 		},
 

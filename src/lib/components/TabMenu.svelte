@@ -1,8 +1,9 @@
 <script lang="ts">
 	import ToolsMenu from './ToolsMenu.svelte';
 	import SaveMenu from './SaveMenu.svelte';
+	import ClippingMenu from './ClippingMenu.svelte';
 
-	let activeTab = $state('tools'); // 'tools' or 'save'
+	let activeTab = $state('tools'); // 'tools', 'save', or 'clipping'
 </script>
 
 <div class="tab-menu">
@@ -13,13 +14,18 @@
 		<button class:active={activeTab === 'save'} onclick={() => (activeTab = 'save')}>
 			Save/Load
 		</button>
+		<button class:active={activeTab === 'clipping'} onclick={() => (activeTab = 'clipping')}>
+			Clipping
+		</button>
 	</div>
 
 	<div class="tab-content">
 		{#if activeTab === 'tools'}
 			<ToolsMenu />
-		{:else}
+		{:else if activeTab === 'save'}
 			<SaveMenu />
+		{:else}
+			<ClippingMenu />
 		{/if}
 	</div>
 </div>

@@ -92,7 +92,7 @@
 			<p class="no-drawings">No saved drawings</p>
 		{:else}
 			<ul class="drawings-list">
-				{#each savedDrawings as drawing}
+				{#each savedDrawings as drawing (drawing.timestamp)}
 					<li>
 						<span class="drawing-name">{drawing.name}</span>
 						<span class="drawing-date">{new Date(drawing.timestamp).toLocaleString()}</span>
