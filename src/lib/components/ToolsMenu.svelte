@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { appState } from '$lib/global.svelte';
-	import type { Tool } from '../types';
+	import type { Tool } from '../../types';
 
 	// Available colors
 	const colors = [

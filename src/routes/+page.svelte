@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { innerHeight, innerWidth } from 'svelte/reactivity/window';
-	import Canvas from './Canvas.svelte';
-	import Toolbar from './Toolbar.svelte';
-	import TabMenu from './TabMenu.svelte';
+	import Canvas from '$lib/components/Canvas.svelte';
+	import Toolbar from '$lib/components/Toolbar.svelte';
+	import TabMenu from '$lib/components/TabMenu.svelte';
 	import { appState } from '$lib/global.svelte';
 
 	// App state
