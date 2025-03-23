@@ -933,7 +933,7 @@ function createState() {
 
 		getAreaDesenho: () => {
 			// return pixel matriz
-			const imgData = ctx?.getImageData(0, 0, width, height);
+			return ctx?.getImageData(0, 0, width, height);
 		}
 	};
 }

@@ -23,6 +23,9 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Deds Paint</title>
+</svelte:head>
 <main>
 	<div class="paint-app">
 		<TabMenu />

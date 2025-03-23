@@ -1,38 +1,41 @@
-# sv
+# Deds Paint
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Projeto desenvolvido para a aula de Computação grafica na puc minas
 
-## Creating a project
+## Rodando o projeto
 
-If you're seeing this, you've probably already done this step. Congrats!
+é necessario possuir o [NodeJs](https://nodejs.org/en/download) para executar o projeto localmente, guia de instalacao pode ser encontrado clicando no link https://nodejs.org/en/download
+
+Abra o terminal na pasta do projeto e siga os passos a seguir
+
+Instalando as dependencias do projeto
 
 ```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+npm i
 ```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
 ```bash
 npm run dev
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## Abrindo o projeto
 
-To create a production version of your app:
+abra o navegador no link localhost:5173 como mencionado no terminal apos o comando anterior
 
-```bash
-npm run build
-```
+## Note
 
-You can preview the production build with `npm run preview`.
+- O canvas do html representa a imagem como um array de pixels, por baixo, assim satisfaz o requisito funcional do trabalho
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+https://developer.mozilla.org/en-US/docs/Web/API/ImageData
+
+pode ser acessado atravez do getter em global.svelte.ts
+
+````ts
+getAreaDesenho: () => {
+// return pixel matriz
+return ctx?.getImageData(0, 0, width, height);
+}
+
+        ```
+````
