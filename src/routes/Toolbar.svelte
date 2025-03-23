@@ -12,6 +12,14 @@
 	  '#00FFFF', // cyan
 	  '#FFFFFF', // white
 	];
+
+	// Add a state for rasterization algorithm
+	// let rasterizationAlgorithm = $state('dda'); // 'dda', 'bresenham'
+	
+	// // Update the app state when algorithm changes
+	// $effect(() => {
+	//   appState.rasterizationAlgorithm = rasterizationAlgorithm;
+	// });
   </script>
   
   <div class="toolbar">
@@ -165,6 +173,36 @@
 		{/each}
 	  </div>
 	</div>
+
+	<div class="toolbar-section">
+	  <h3>Rasterization</h3>
+	  
+	  <div class="algorithm-options">
+		<div class="control-row">
+		  <label>
+			<input 
+			  type="radio" 
+			  name="rasterization" 
+			  value="dda" 
+			  bind:group={appState.rasterizationAlgorithm}
+			/>
+			DDA Line
+		  </label>
+		</div>
+		
+		<div class="control-row">
+		  <label>
+			<input 
+			  type="radio" 
+			  name="rasterization" 
+			  value="bresenham" 
+			  bind:group={appState.rasterizationAlgorithm}
+			/>
+			Bresenham
+		  </label>
+		</div>
+	  </div>
+	</div>
   </div>
   
   <style>
@@ -247,5 +285,25 @@
 	.color-option.active {
 	  border: 2px solid #333;
 	  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+	}
+
+	.algorithm-options {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 8px;
+	  margin-top: 8px;
+	}
+	
+	.control-row {
+	  display: flex;
+	  align-items: center;
+	}
+	
+	.control-row label {
+	  display: flex;
+	  align-items: center;
+	  gap: 6px;
+	  font-size: 14px;
+	  cursor: pointer;
 	}
   </style>

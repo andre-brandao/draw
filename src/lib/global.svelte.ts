@@ -47,6 +47,9 @@ function createState() {
     objects: 0
   });
 
+  // Add this to your existing state variables
+  let rasterizationAlgorithm: 'dda' | 'bresenham' = $state('dda'); // 'dda', 'bresenham'
+
   // ===== Helper Functions =====
 
   // Get mouse position relative to canvas
@@ -494,6 +497,15 @@ function createState() {
     },
     set currentColor(value) {
       currentColor = value;
+    },
+
+    // Add these to your existing properties
+    get rasterizationAlgorithm() {
+      return rasterizationAlgorithm;
+    },
+    set rasterizationAlgorithm(value) {
+      rasterizationAlgorithm = value;
+      redraw();
     },
     
     // Other state getters

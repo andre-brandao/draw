@@ -2,6 +2,7 @@
 import type { Shape, CircleData, PointData } from '../../types';
 import { SELECTION_BORDER_COLOR, POINT_RADIUS } from '../index';
 import { Point } from './Point.svelte';
+import { bresenhamCircle } from '../rasterization';
 
 export class Circle implements Shape {
   type = 'circle' as const;
@@ -99,18 +100,33 @@ export class Circle implements Shape {
 
   // Drawable method
   draw(ctx: CanvasRenderingContext2D): void {
-    ctx.beginPath();
-    ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = this.color + '40'; // 25% opacity
-    ctx.fill();
+    // Use Bresenham's circle algorithm
+    const plot = (x: number, y: number) => {
+      ctx.fillStyle = this.color;
+      ctx.fillRect(x, y, 1, 1);
+    };
     
-    ctx.strokeStyle = this.color;
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    bresenhamCircle(
+      Math.round(this.center.x), 
+      Math.round(this.center.y), 
+      Math.round(this.radius), 
+      plot
+    );
+    
+    // Optional: Fill the circle with a semi-transparent color
+    if (this.radius > 0) {
+      ctx.beginPath();
+      ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.color + '40'; // 25% opacity
+      ctx.fill();
+    }
 
+    // Draw center point and selection indicator
     if (this.selected) {
       ctx.strokeStyle = SELECTION_BORDER_COLOR;
       ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
       ctx.stroke();
       
       // Draw center point when selected

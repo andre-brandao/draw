@@ -33,6 +33,8 @@
 	  if (appState.height !== height) {
 		appState.height = height;
 	  }
+
+	  appState.redraw()
 	});
   </script>
   
