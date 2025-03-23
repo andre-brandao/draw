@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-const */
-import type { Tool, Point, Line, Polygon, Shape } from '../types';
+import type { Tool, Point, Line, Polygon, Shape, Transformation } from '../types';
 import {
 	drawPoint,
 	drawLine,
@@ -952,12 +952,5 @@ function createState() {
 		deleteSelectedShapes
 	};
 }
-
-// Add this type for transformation operations
-type Transformation = 
-  | { type: 'translate', dx: number, dy: number }
-  | { type: 'rotate', angle: number, originX: number, originY: number }
-  | { type: 'scale', scaleX: number, scaleY: number, originX: number, originY: number }
-  | { type: 'reflect', axis: 'x' | 'y' | 'xy', originX: number, originY: number };
 
 export const appState = createState();

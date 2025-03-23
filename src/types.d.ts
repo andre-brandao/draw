@@ -35,3 +35,10 @@ export type Tool =
 	| 'move' // move Selectables
 	| 'delete' // delete Selectables
 	| 'cursor'; // default cursor
+
+// Add this type for transformation operations
+type Transformation = 
+  | { type: 'translate', dx: number, dy: number }
+  | { type: 'rotate', angle: number, originX: number, originY: number }
+  | { type: 'scale', scaleX: number, scaleY: number, originX: number, originY: number }
+  | { type: 'reflect', axis: 'x' | 'y' | 'xy', originX: number, originY: number };

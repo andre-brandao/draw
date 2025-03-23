@@ -28,7 +28,7 @@
 	  
 	  <div class="canvas-container">
 		<div class="header">
-		  <h1>Svelte 5 Paint</h1>
+		  <h1>Deds Paint</h1>
 		  <div class="tool-info">Current tool: <span class="tool-name">{appState.selectedTool}</span></div>
 		</div>
 		
