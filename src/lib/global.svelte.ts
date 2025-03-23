@@ -18,7 +18,8 @@ function createState() {
 	// Tools state
 	let selectedTool: Tool = $state('cursor');
 	let currentColor = $state('#000000');
-	let clippingEnabled = $state(false);
+	let snappingEnabled = $state(false);
+  
 	// Interaction state
 	let interaction = $state({
 		isDrawing: false,
@@ -55,7 +56,7 @@ function createState() {
 
 	// Find a snap point near the given coordinates
 	function findSnapPoint(x: number, y: number): { x: number; y: number } | null {
-		if (!clippingEnabled) return null;
+		if (!snappingEnabled) return null;
 
 		// First check for snap to points/vertices
 		for (const shape of geometryStore.shapes) {
@@ -791,11 +792,11 @@ function createState() {
 		get tooltip() {
 			return tooltip;
 		},
-    get clippingEnabled() {
-      return clippingEnabled;
+    get snappingEnabled() {
+      return snappingEnabled;
     },
-    set clippingEnabled(value) {
-      clippingEnabled = value;
+    set snappingEnabled(value) {
+      snappingEnabled = value;
     },
 
 		// Actions

@@ -36,13 +36,6 @@
 		{ id: 'delete', name: 'Delete', icon: '🗑' }
 	];
 
-	// Transform operations
-	let translateX = $state('0');
-	let translateY = $state('0');
-	let rotateAngle = $state('0');
-	let scaleX = $state('1');
-	let scaleY = $state('1');
-	let reflectAxis = $state<'x' | 'y' | 'xy'>('x');
 </script>
 
 <div class="tools-menu">
@@ -50,7 +43,7 @@
 		<h3>Settings</h3>
 		<div class="setting-option">
 			<label for="clipping-toggle">
-				<input type="checkbox" id="clipping-toggle" bind:checked={appState.clippingEnabled} />
+				<input type="checkbox" id="clipping-toggle" bind:checked={appState.snappingEnabled} />
 				Enable Snapping
 			</label>
 		</div>
@@ -171,12 +164,7 @@
 		padding-bottom: 5px;
 	}
 
-	h4 {
-		margin: 5px 0;
-		font-size: 13px;
-		font-weight: 600;
-		color: #555;
-	}
+
 
 	.tool-buttons {
 		display: grid;
