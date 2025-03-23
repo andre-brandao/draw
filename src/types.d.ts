@@ -25,7 +25,7 @@ export interface Drawable {
 
 // Shape interface combining all capabilities
 export interface Shape extends Selectable, Colorable, Transformable, Drawable {
-  type: 'point' | 'line' | 'polygon';
+  type: 'point' | 'line' | 'polygon' | 'circle';
   clone(): Shape;
   contains(x: number, y: number, threshold?: number): boolean;
   getBoundingBox(): {x1: number, y1: number, x2: number, y2: number};
@@ -52,10 +52,18 @@ export interface PolygonData {
   selected?: boolean;
 }
 
+export interface CircleData {
+  center: PointData;
+  radius: number;
+  color?: string;
+  selected?: boolean;
+}
+
 export type Tool =
   | 'point'
   | 'line' 
   | 'polygon'
+  | 'circle'
   | 'select_box'
   | 'select_cursor'
   | 'move'

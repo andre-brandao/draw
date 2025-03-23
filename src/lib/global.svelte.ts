@@ -5,6 +5,7 @@ import { geometryStore } from './geometryStore.svelte';
 import { Point } from './shapes/Point.svelte';
 import { Line } from './shapes/Line.svelte';
 import { Polygon } from './shapes/Polygon.svelte';
+import { Circle } from './shapes/Circle.svelte';
 import { POINT_RADIUS, drawSelectionRect } from './index';
 
 function createState() {
@@ -33,7 +34,8 @@ function createState() {
   // Temporary drawing state
   let temp = $state({
     currentPolygon: null as Polygon | null,
-    tempLine: null as Line | null
+    tempLine: null as Line | null,
+    tempCircle: null as Circle | null
   });
 
   // Tooltip state
@@ -88,6 +90,10 @@ function createState() {
         ctx.stroke();
         ctx.setLineDash([]);
       }
+    }
+
+    if (temp.tempCircle) {
+      temp.tempCircle.draw(ctx);
     }
 
     // Draw the selection box if active
@@ -169,6 +175,16 @@ function createState() {
           }
         }
         redraw();
+        break;
+      }
+
+      case 'circle': {
+        // Start drawing a circle - set the center
+        temp.tempCircle = new Circle({
+          center: { x, y },
+          radius: 0,
+          color: currentColor
+        });
         break;
       }
 
@@ -266,6 +282,16 @@ function createState() {
         }
         break;
 
+      case 'circle':
+        // Update the radius of the temporary circle
+        if (temp.tempCircle) {
+          const dx = x - temp.tempCircle.center.x;
+          const dy = y - temp.tempCircle.center.y;
+          temp.tempCircle.radius = Math.sqrt(dx * dx + dy * dy);
+          redraw();
+        }
+        break;
+
       case 'select_box':
         // We're drawing a selection box
         redraw();
@@ -309,6 +335,24 @@ function createState() {
             color: currentColor
           });
           temp.tempLine = null;
+          redraw();
+        }
+        break;
+      }
+
+      case 'circle': {
+        if (temp.tempCircle && temp.tempCircle.radius > 2) {
+          // Finalize the circle if it has a reasonable radius
+          geometryStore.addCircle({
+            center: { x: temp.tempCircle.center.x, y: temp.tempCircle.center.y },
+            radius: temp.tempCircle.radius,
+            color: currentColor
+          });
+          temp.tempCircle = null;
+          redraw();
+        } else {
+          // Cancel if too small
+          temp.tempCircle = null;
           redraw();
         }
         break;
@@ -395,7 +439,8 @@ function createState() {
 
     temp = {
       currentPolygon: null,
-      tempLine: null
+      tempLine: null,
+      tempCircle: null
     };
 
     if (ctx && canvas) {

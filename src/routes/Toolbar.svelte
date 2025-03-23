@@ -61,6 +61,17 @@
 		  </svg>
 		  Polygon
 		</button>
+
+		<button 
+		  class:active={appState.selectedTool === 'circle'} 
+		  on:click={() => appState.selectedTool = 'circle'}
+		  title="Draw Circle"
+		>
+		  <svg viewBox="0 0 24 24" width="16" height="16">
+			<circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+		  </svg>
+		  Circle
+		</button>
 	  </div>
 	</div>
 	

@@ -1,7 +1,8 @@
 import { Point } from './shapes/Point.svelte';
 import { Line } from './shapes/Line.svelte';
 import { Polygon } from './shapes/Polygon.svelte';
-import type { Shape, PointData, LineData, PolygonData, TransformationType } from '../types';
+import { Circle } from './shapes/Circle.svelte';
+import type { Shape, PointData, LineData, PolygonData, CircleData, TransformationType } from '../types';
 import { POINT_RADIUS } from './index';
 
 export class GeometryStore {
@@ -25,6 +26,12 @@ export class GeometryStore {
 		const polygon = new Polygon(data);
 		this.shapes = [...this.shapes, polygon];
 		return polygon;
+	}
+
+	addCircle(data: CircleData): Circle {
+		const circle = new Circle(data);
+		this.shapes = [...this.shapes, circle];
+		return circle;
 	}
 
 	// Selection methods
