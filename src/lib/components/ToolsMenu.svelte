@@ -88,7 +88,7 @@
 		</div>
 	</div>
 
-	<div class="toolbar-section">
+	<!-- <div class="toolbar-section">
 		<h3>Colors</h3>
 		<div class="color-grid">
 			{#each colors as color}
@@ -110,7 +110,7 @@
 			}}
 			class="color-picker"
 		/>
-	</div>
+	</div> -->
 
 	<div class="toolbar-section">
 		<h3>Rasterization</h3>
@@ -222,39 +222,6 @@
 		background-color: #f5f5f5;
 	}
 
-	.color-grid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 8px;
-		margin-bottom: 8px;
-	}
-
-	.color-swatch {
-		width: 30px;
-		height: 30px;
-		border-radius: 4px;
-		border: 1px solid #ddd;
-		cursor: pointer;
-		transition: transform 0.2s;
-	}
-
-	.color-swatch:hover {
-		transform: scale(1.1);
-	}
-
-	.color-swatch.active {
-		border: 2px solid #333;
-		transform: scale(1.1);
-	}
-
-	.color-picker {
-		width: 100%;
-		height: 30px;
-		padding: 0;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		cursor: pointer;
-	}
 
 	.rasterization-options {
 		display: flex;

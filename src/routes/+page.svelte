@@ -4,6 +4,7 @@
 	import Canvas from '$lib/components/Canvas.svelte';
 	import TabMenu from '$lib/components/TabMenu.svelte';
 	import { appState } from '$lib/global.svelte';
+	import ColorMenu from '$lib/components/ColorMenu.svelte';
 
 	// App state
 	let canvasWidth = $state(800);
@@ -13,7 +14,7 @@
 	$effect(() => {
 		if (innerWidth.current && innerHeight.current) {
 			canvasWidth = Math.min(1200, innerWidth.current - 300);
-			canvasHeight = Math.min(800, innerHeight.current - 100);
+			canvasHeight = Math.min(800, innerHeight.current - 150);
 		}
 	});
 
@@ -31,6 +32,8 @@
 				<h1>Deds Paint</h1>
 				<div class="tool-info">
 					Current tool: <span class="tool-name">{appState.selectedTool}</span>
+
+					<ColorMenu />
 				</div>
 			</div>
 
