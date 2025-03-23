@@ -36,6 +36,18 @@ export class Circle implements Shape {
     });
   }
 
+  serialize(): CircleData {
+    return {
+      center: { 
+        x: this.center.x, 
+        y: this.center.y 
+      },
+      radius: this.radius,
+      color: this.color,
+      selected: this.selected
+    };
+  }
+
   contains(x: number, y: number, threshold = 5): boolean {
     // Calculate distance from point to center
     const dx = x - this.center.x;

@@ -28,6 +28,14 @@ export class Polygon implements Shape {
     });
   }
 
+  serialize(): PolygonData {
+    return {
+      points: this.points.map(p => ({ x: p.x, y: p.y })),
+      color: this.color,
+      selected: this.selected
+    };
+  }
+
   contains(x: number, y: number): boolean {
     if (this.points.length < 3) return false;
 

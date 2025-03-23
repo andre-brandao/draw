@@ -457,6 +457,82 @@ function createState() {
     redraw();
   }
 
+  // Save current drawing to local storage
+  function saveDrawing(name: string): boolean {
+    const data = geometryStore.serializeShapes();
+    try {
+      // Get existing saved drawings
+      const savedDrawings = localStorage.getItem('deds-paint-drawings') || '{}';
+      const drawings = JSON.parse(savedDrawings);
+      
+      // Add this drawing with timestamp
+      drawings[name] = {
+        data: data,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Save back to local storage
+      localStorage.setItem('deds-paint-drawings', JSON.stringify(drawings));
+      return true;
+    } catch (error) {
+      console.error('Failed to save drawing:', error);
+      return false;
+    }
+  }
+
+  // Load drawing from local storage
+  function loadDrawing(name: string): boolean {
+    try {
+      const savedDrawings = localStorage.getItem('deds-paint-drawings') || '{}';
+      const drawings = JSON.parse(savedDrawings);
+      
+      if (drawings[name]) {
+        geometryStore.loadShapes(drawings[name].data);
+        redraw();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to load drawing:', error);
+      return false;
+    }
+  }
+
+  // Get list of saved drawings
+  function getSavedDrawings(): {name: string, timestamp: string}[] {
+    try {
+      const savedDrawings = localStorage.getItem('deds-paint-drawings') || '{}';
+      const drawings = JSON.parse(savedDrawings);
+      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return Object.entries(drawings).map(([name, info]: [string, any]) => ({
+        name,
+        timestamp: info.timestamp
+      }));
+    } catch (error) {
+      console.error('Failed to get saved drawings:', error);
+      return [];
+    }
+  }
+
+  // Delete a saved drawing
+  function deleteSavedDrawing(name: string): boolean {
+    try {
+      const savedDrawings = localStorage.getItem('deds-paint-drawings') || '{}';
+      const drawings = JSON.parse(savedDrawings);
+      
+      if (drawings[name]) {
+        delete drawings[name];
+        localStorage.setItem('deds-paint-drawings', JSON.stringify(drawings));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to delete drawing:', error);
+      return false;
+    }
+  }
+
   return {
     // Canvas properties
     get canvas() {
@@ -551,7 +627,13 @@ function createState() {
       geometryStore.deleteSelectedShapes();
       updateTooltipState();
       redraw();
-    }
+    },
+
+    // Add save/load functions
+    saveDrawing,
+    loadDrawing,
+    getSavedDrawings,
+    deleteSavedDrawing
   };
 }
 

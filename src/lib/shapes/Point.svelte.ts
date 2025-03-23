@@ -24,7 +24,14 @@ export class Point implements Shape {
       selected: this.selected
     });
   }
-
+  serialize(): PointData {
+    return {
+        x: this.x,
+        y: this.y,
+        color: this.color,
+        selected: this.selected
+    };
+}
   contains(x: number, y: number, threshold = POINT_RADIUS): boolean {
     const dx = x - this.x;
     const dy = y - this.y;

@@ -48,7 +48,14 @@ export class Line implements Shape {
 			selected: this.selected
 		});
 	}
-
+	serialize(): LineData {
+        return {
+            start: { x: this.start.x, y: this.start.y },
+            end: { x: this.end.x, y: this.end.y },
+            color: this.color,
+            selected: this.selected
+        };
+    }
 	contains(x: number, y: number, threshold = 5): boolean {
 		const { start, end } = this;
 

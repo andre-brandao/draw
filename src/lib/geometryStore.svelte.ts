@@ -144,6 +144,51 @@ export class GeometryStore {
 		this.shapes = [];
 		this.selectedShapes = [];
 	}
+
+	// Serialize all shapes to JSON
+	serializeShapes(): string {
+		const shapesData = this.shapes.map(shape => {
+			switch (shape.type) {
+				case 'point':
+					return { type: 'point', data: (shape as Point).serialize() };
+				case 'line':
+					return { type: 'line', data: (shape as Line).serialize() };
+				case 'polygon':
+					return { type: 'polygon', data: (shape as Polygon).serialize() };
+				case 'circle':
+					return { type: 'circle', data: (shape as Circle).serialize() };
+			}
+		});
+		return JSON.stringify(shapesData);
+	}
+
+	// Load shapes from JSON
+	loadShapes(json: string): void {
+		try {
+			const shapesData = JSON.parse(json);
+			this.clear(); // Clear current shapes first
+			
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			shapesData.forEach((item: any) => {
+				switch (item.type) {
+					case 'point':
+						this.addPoint(item.data);
+						break;
+					case 'line':
+						this.addLine(item.data);
+						break;
+					case 'polygon':
+						this.addPolygon(item.data);
+						break;
+					case 'circle':
+						this.addCircle(item.data);
+						break;
+				}
+			});
+		} catch (error) {
+			console.error('Failed to load shapes:', error);
+		}
+	}
 }
 
 // Export singleton instance
